@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Question Generator</title>
+  </head>
+  <body>
+    <h1>Generate Questions</h1>
+    <textarea id="paragraph" placeholder="Enter your paragraph here"></textarea>
+    <button id="generateButton">Generate Questions</button>
+    <div id="questions"></div>
+
+    <script>
+      document
+        .getElementById("generateButton")
+        .addEventListener("click", async () => {
+          const paragraph = document.getElementById("paragraph").value;
+          if (!paragraph) {
+            alert("Please enter a paragraph.");
+            return;
+          }
+
+          // Make a POST request to the Flask server
+          const response = await fetch("http://localhost:5000/generate_questions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ paragraph }),
+          });
+
+          if (response.status === 200) {
+            const result = await response.json();
+            const questions = result.questions;
+
+            // Display the generated questions
+            displayQuestions(questions);
+          } else {
+            console.error("Error:", response.statusText);
+          }
+        });
+
+      function displayQuestions(questions) {
+        const questionsDiv = document.getElementById("questions");
+        questionsDiv.innerHTML = ""; // Clear previous questions
+
+        if (!questions || questions.length === 0) {
+          questionsDiv.innerHTML = "No questions generated.";
+          return;
+        }
+
+        questions.forEach((question, index) => {
+          const questionElement = document.createElement("p");
+          questionElement.textContent = `Question ${index + 1}: ${question}`;
+          questionsDiv.appendChild(questionElement);
+        });
+      }
+    </script>
+  </body>
+</html>
