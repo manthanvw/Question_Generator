@@ -3,6 +3,8 @@ import './App.css';
 
 function App() {
   const [paragraph, setParagraph] = useState('');
+  const [num, setNum] = useState(5);
+  const [generatedText, setGeneratedText] = useState('');
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [difficulty, setDifficulty] = useState(1);
@@ -15,12 +17,23 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ paragraph, difficulty }), // Send both paragraph and difficulty level
+        body: JSON.stringify({ paragraph, difficulty }), // Parse 'num' to an integer
       });
-
       if (response.status === 200) {
         const result = await response.json();
-        setQuestions(result.questions);
+        const newQuestions = result.questions;
+
+        // Combine newly generated questions with existing questions
+        const allQuestions = [...questions, ...newQuestions];
+
+        // Update the state with all questions
+        setQuestions(allQuestions);
+
+        // Update the generated text with all questions
+        const generatedText = allQuestions
+          .map((question, index) => `Question ${index + 1}: ${question.text}`)
+          .join('\n');
+        setGeneratedText(generatedText);
       } else {
         console.error('Error:', response.statusText);
       }
@@ -31,11 +44,38 @@ function App() {
     }
   };
 
-  // ... rest of the code remains the same
+  const downloadQuestions = () => {
+    if (generatedText.length === 0) {
+      console.error('No questions to download.');
+      return;
+    }
+
+    const blob = new Blob([generatedText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'generated-questions.txt';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Generate Questions</h1>
+      {/* <div>
+        <label htmlFor="numberSelect" className="form-label">
+          Enter number of questions to be generated:
+        </label>
+        <input
+          id="num"
+          type="number"
+          value={num}
+          onChange={(e) => setNum(e.target.value)}
+        />
+      </div> */}
       <div className="mb-3">
         <textarea
           id="paragraph"
@@ -59,10 +99,8 @@ function App() {
           }}
         >
           <option value={1}>1 (Lowest)</option>
-          <option value={2}>2</option>
-          <option value={3}>3 (Medium)</option>
-          <option value={4}>4</option>
-          <option value={5}>5 (Highest)</option>
+          <option value={2}>2 (Medium)</option>
+          <option value={3}>3 (Highest)</option>
         </select>
       </div>
       <div className="mb-3">
@@ -89,6 +127,9 @@ function App() {
           </ul>
         )}
       </div>
+      <button className="btn btn-success" onClick={downloadQuestions}>
+        Download Questions
+      </button>
     </div>
   );
 }
