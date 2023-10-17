@@ -3,11 +3,10 @@ import './App.css';
 
 function App() {
   const [paragraph, setParagraph] = useState('');
-  const [num, setNum] = useState(5);
-  const [generatedText, setGeneratedText] = useState('');
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [difficulty, setDifficulty] = useState(1);
+  const [generatedText, setGeneratedText] = useState('');
 
   const generateQuestions = async () => {
     setLoading(true);
@@ -36,7 +35,7 @@ function App() {
         setGeneratedText(generatedText);
       } else {
         console.error('Error:', response.statusText);
-      }
+      }  
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -65,17 +64,6 @@ function App() {
   return (
     <div className="container mt-5">
       <h1 className="mb-4">Generate Questions</h1>
-      {/* <div>
-        <label htmlFor="numberSelect" className="form-label">
-          Enter number of questions to be generated:
-        </label>
-        <input
-          id="num"
-          type="number"
-          value={num}
-          onChange={(e) => setNum(e.target.value)}
-        />
-      </div> */}
       <div className="mb-3">
         <textarea
           id="paragraph"
@@ -105,17 +93,11 @@ function App() {
       </div>
       <div className="mb-3">
         <button className="btn btn-primary" onClick={generateQuestions}>
-          Generate Questions
+          {loading ? 'Generating...' : 'Generate Questions'}
         </button>
       </div>
       <div id="questions">
-        {loading ? (
-          <div className="d-flex justify-content-center align-items-center">
-            <div className="spinner-border" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-          </div>
-        ) : questions.length === 0 ? (
+        {questions.length === 0 ? (
           <p>No questions generated.</p>
         ) : (
           <ul className="list-group">
